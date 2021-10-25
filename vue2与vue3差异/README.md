@@ -1,14 +1,78 @@
 # vue3 & vue2 差异
 
-脚手架 Vite
+## Vite
+vite ，是一个基于浏览器原生 ES imports 的开发服务器(开发构建工具)，它做到了本地快速开发启动, 用 vite 文档上的介绍，它具有以下特点：
++ 快速的冷启动，不需要等待打包操作；
++ 即时的热模块更新，替换性能和模块数量的解耦让更新飞起；
++ 真正的按需编译，不再等待整个应用编译完成;
+> Vite，一个基于浏览器原生 ES imports 的开发服务器。利用浏览器去解析 imports，在服务器端按需编译返回，完全跳过了打包这个概念，服务器随起随用。同时不仅有 Vue 文件支持，还搞定了热更新，而且热更新的速度不会随着模块增多而变慢。针对生产环境则可以把同一份代码用 rollup 打。虽然现在还比较粗糙，但这个方向我觉得是有潜力的，做得好可以彻底解决改一行代码等半天热更新的问题。
+
+使用 npm：
+```coffeescript
+# npm 7+，需要加上额外的双短横线
+$ npm init vite@latest <project-name> -- --template vue
+
+$ cd <project-name>
+$ npm install
+$ npm run dev
+```
+或者 yarn：
+```coffeescript
+$ yarn create vite <project-name> --template vue
+$ cd <project-name>
+$ yarn
+$ yarn dev
+```
+
+
+## 概览
+哪些变化  
+![change.png](img/change.png)
++ 速度更快
++ 体积减少
++ 更易维护
++ 更接近原生
++ 更易使用
+1. 速度更快   
++ 重写了虚拟Dom实现
++ 编译模板的优化
++ 更高效的组件初始化
++ undate性能提高
++ SSR速度提高
+2. 体积更小   
+![threeShaking.png](img/threeShaking.png)   
+通过webpack的tree-shaking功能，可以将无用模块“剪辑”，仅打包需要的能够tree-shaking
+3. 更易维护   
+![maintain.png](img/maintain.png)
+  compositon Api   
+  可与现有的Options API一起使用   
+  灵活的逻辑组合与复用   
+  vue3模块可以和其他框架搭配使用   
+  更好的Typescript支持   
+   vue3是基于typescipt编写的，可以享受到自动的类型定义提示   
+4. 更接近原生   
+   ![CloseNative.png](img/CloseNative.png)   
+   可以自定义渲染 API    
+5. 更易使用   
+   ![img.png](img/obervable.png)
+   响应式 Api 暴露出来
 
 ## 一, 全局api
 ### 1. 全局 Vue API 已更改为使用应用程序实例 
 vue2使用全局api 如 Vue.component, Vue.mixin, Vue.use等，缺点是会导致所创建的根实例将共享相同的全局配置（从相同的 Vue 构造函数创建的每个根实例都共享同一套全局环境。这样就导致一个问题，只要某一个根实例对 全局 API 和 全局配置做了变动，就会影响由相同 Vue 构造函数创建的其他根实例。）   
-vue3调用createApp返回一个应用实例，拥有全局API的一个子集，任何全局改变 Vue 行为的 API 现在都会移动到应用实例上  
-### 2. 全局和内部 API 已经被重构为可 tree-shaking   
-编译阶段利用ES6 Module判断哪些模块已经加载    
-判断那些模块和变量未被使用或者引用，进而删除对应代码   
+vue3 新增了createApp,调用createApp返回一个应用实例，拥有全局API的一个子集，任何全局改变 Vue 行为的 API 现在都会移动到应用实例上  
+![global_api.png](img/global_api.png)
+### 2. 全局和内部 API 已经被重构为可 tree-shaking
+
+> tree-shakinng 原理   
+tree-shakinng基于ES6模块实现：      
+只能作为模块顶层的语句出现   
+import 的模块名只能是字符串常量   
+import binding 是 immutable的   
+ES6模块依赖关系是确定的，和运行时的状态无关，可以进行可靠的静态分析，这就是tree-shaking的基础   
+分析程序流，判断哪些变量未被使用、引用，进而删除此代码
+ 
+编译阶段利用ES6 Module判断哪些模块已经加载以及哪些模块和变量未被使用或者引用，进而删除对应代码   
 在Vue2中，全局 API 如 Vue.nextTick() 是不支持 tree-shake 的，不管它们实际是否被使用，都会被包含在最终的打包产物中。   
 而Vue3源码引入tree shaking特性，将全局 API 进行分块。如果你不使用其某些功能，它们将不会包含在你的基础包中
 
@@ -19,16 +83,15 @@ Vue.version
 Vue.compile (only in full builds)   
 Vue.set (only in compat builds)   
 Vue.delete   
-### 3. 组件挂载   
-vue3使用createApp()初始化后，应用实例 app 可用 app.mount() 挂载根组件实例 
-```
+### 3. 组件挂载
+```coffeescript
 import { createApp } from 'vue'
 import App from './App.vue'
 
-const app = createApp(App)  
+const app = createApp(App)
+app.mount('#app')
 ```
-App单文件组件经过编译后得到一个render函数
-createApp会返回一个app对象，里面包含一个mount函数
+createApp初始化后会返回一个app对象，里面包含一个mount函数
 mount函数是被重写过的
 1. 处理传入的容器并生成节点；
 2. 判断传入的组件是不是函数组件，组件里有没有render函数，template属性，没有就用容器的innerHTML作为组件的template；
@@ -37,35 +100,121 @@ mount函数是被重写过的
 
 ## 二, 模板指令   
 + 组件上 v-model 用法更改，替换 v-bind.sync   
- vue2默认会利用名为 value 的 prop 和名为 input 的事件  
+vue2默认会利用名为 value 的 prop 和名为 input 的事件
+```coffeescript
+// ParentComponent
+<ChildComponent v-model="pageTitle" />
+
+<!-- 是以下的简写: -->
+
+<ChildComponent :value="pageTitle" @input="pageTitle = $event" />
+
+ // ChildComponent
+
+<input type="text" :value="value" @input="$emit('input', $event.target.value)">
+```
+如果想要更改 prop 或事件名称，则需要在组件中添加 model 选项：
+model选项,允许组件自定义用于 v-model 的 prop 和事件
+```coffeescript
+// ChildComponent
+<input type="text" :value="title" @input="$emit('change', $event.target.value)">
+export default {
+  model: {
+    prop: 'title',
+    event: 'change'
+  },
+  props: {
+    title: String
+  }
+}
+```
+使用 `title` 代替 `value` 作为 model 的 prop  
+
+vue2.3 新增.sync (对某一个 prop 进行“双向绑定”,是update:title 事件的简写)
+```coffeescript
+// ParentComponent
+<ChildComponent :title.sync="name" />
+
+<!-- 是以下的简写 -->
+
+<ChildComponent :title="pageTitle" @update:title="pageTitle = $event" />
+```
+```coffeescript
+ // ChildComponent
+ <input type="text" :value="title" @input="$emit('update:title', $event.target.value)">
+```
+在 3.x 中，自定义组件上的 v-model 相当于传递了 modelValue prop 并接收抛出的 update:modelValue 事件   
  prop：value -> modelValue；   
  event：input -> update:modelValue   
- model选项,允许组件自定义用于 v-model 的 prop 和事件   
-.sync (对某一个 prop 进行“双向绑定”,是update:myPropName 事件的简写)    
-v-bind 的 .sync 修饰符和组件的 model 选项已移除，可用 v-model 作为代替  
-vue3 
- 可以将一个 argument 传递给 v-model：   
+v-bind 的 .sync 修饰符和组件的 model 选项已移除，可用 v-model加参数 作为代替  
+vue3 可以将一个 argument 传递给 v-model：   
  `<ChildComponent v-model:title="pageTitle" />`   
  等价于   
  `
  <ChildComponent :title="pageTitle" @update:title="pageTitle = $event" />`   
 可使用多个model
+![img.png](img/model.png)
  + 可以在template元素上添加 key
+```coffeescript
+<template v-for="item in list" :key="item.id">
+  <div>...</div>
+</template>
+```
  + 同一节点v-if 比 v-for 优先级更高
- + v-bind="object" 现在排序敏感（vue绑定相同property，单独的 property 总是会覆盖 object 中的绑定。vue3按顺序决定如何合并）
+ + v-bind="object" 现在排序敏感（绑定相同property，vue2单独的 property 总是会覆盖 object 中的绑定。vue3按顺序决定如何合并）
+```coffeescript
+<div id="red" v-bind="{ id: 'blue' }" ></div>
+// vue2 id="red"
+// vue3 id="blue"
+```
  + 移除 v-on.native 修饰符    
  Vue 2 如果想要在一个组件的根元素上直接监听一个原生事件，需要使用v-on 的 .native 修饰符   
  Vue3 现在将所有未在组件emits 选项中定义的事件作为原生事件添加到子组件的根元素中（除非子组件选项中设置了 inheritAttrs: false）。
  (强烈建议组件中使用的所有通过emit触发的event都在emits中声明)
+ ```coffeescript
+<my-component
+  v-on:close="handleComponentEvent"
+  v-on:click="handleNativeClickEvent"
+/>
+```
+```coffeescript
+// mycomponent
+<template>
+	<div>
+		<button v-on:click="$emit('click')">click</button>
+		<button v-on:click="$emit('close')">close</button>
+	</div>
+</template>
+<script>
+  export default {
+    emits: ['close']
+  }
+</script>
+```
  + v-for 中的 ref 不再注册 ref 数组   
- 在 v-for 语句中使用ref属性时，会生成refs数组插入$refs属性中。由于当存在嵌套的v-for时，这种处理方式会变得复杂且低效。
- 在 v-for 语句中使用ref属性 将不再会自动在$refs中创建数组。而是，将 ref 绑定到一个 function 中，在 function 中可以灵活处理ref。    
+ vue2在 v-for 语句中使用ref属性时，会生成refs数组插入$refs属性中。由于当存在嵌套的v-for时，这种处理方式会变得复杂且低效。
+ vue3在 v-for 语句中使用ref属性 将不再会自动在$refs中创建数组。而是，将 ref 绑定到一个 function 中，在 function 中可以灵活处理ref。    
+ ```coffeescript
+<div v-for="item in list" :ref="setItemRef"></div>
+
+export default {
+  setup() {
+    let itemRefs = []
+    const setItemRef = el => {
+      itemRefs.push(el)
+    }
+    return {
+      setItemRef
+    }
+  }
+}
+```
 ## 三, 组件
-+ 只能使用普通函数创建功能组件   
++ 只能使用普通函数创建函数式组件   
 在 Vue 2 中，函数式组件有两个主要应用场景：   
 作为性能优化，因为它们的初始化速度比有状态组件快得多   
 返回多个根节点   
-然而Vue 3对有状态组件的性能进行了提升，与函数式组件的性能相差无几。此外，有状态组件现在还包括返回多个根节点的能力。   
+然而Vue 3对有状态组件的性能进行了提升，与函数式组件的性能相差无几。此外，有状态组件现在还包括返回多个根节点的能力。所以，建议只使用有状态组件。   
 + 函数式组件单文件组件：functional 移除,并将 props 的所有引用重命名为 $props，将 attrs 重命名为 $attrs。
 ```
 <template>
@@ -117,6 +266,25 @@ const asyncPageWithOptions  = defineAsyncComponent({
 如果emit的是原生的事件（如，click）,就会存在两次触发。   
 一次来自于$emit的触发；   
 一次来自于根元素原生事件监听器的触发；   
+```coffeescript
+ export default {
+    props: ['text'],
+    emits: ['accepted']
+  }
+```
+```coffeescript
+emits: {
+    click: null,
+    submit: payload => {
+      if (payload.email && payload.password) {
+        return true
+      } else {
+        console.warn(`Invalid submit event payload!`)
+        return false
+      }
+    }
+  }
+```
 ## 四, 渲染函数
 + 渲染函数API    
 h是全局导入，而不是作为参数传递给渲染函数  
@@ -177,7 +345,9 @@ app.config.isCustomElement = tag => tag === 'plastic-button'
 新增了v-is，专门来实现在普通的 HTML 元素渲染组件。
 ## 六, 其他
 + destroyed 生命周期选项被重命名为 unmounted
-+ beforeDestroy 生命周期选项被重命名为 beforeUnmount
++ beforeDestroy 生命周期选项被重命名为 beforeUnmount   
+![img.png](img/img.png)   
+整体来看其实变化不大，使用setup代替了之前的beforeCreate和created，其他生命周期名字有些变化，功能都是没有变化的
 + Props 的默认值函数不能访问this    
 替代方案：    
 把组件接收到的原始 prop 作为参数传递给默认函数；   
@@ -226,9 +396,11 @@ data 组件选项声明不再接收 js 对象，只接受函数形式的声明�
 + propsData 选项之前用于在创建 Vue 实例的过程中传入 prop，现在它被移除了。如果想为 Vue 3 应用的根组件传入 prop，使用 createApp 的第二个参数。
 + 全局函数 set 和 delete 以及实例方法 $set 和 $delete。基于代理的变化检测不再需要它们了。
 ## 响应原理的变化
-Vue3 之前使用了 ES5 的一个 API Object.defineProperty Vue3 中使用了 ES6 的 Proxy，都是对需要侦测的数据进行 变化侦测 ，添加 getter 和 setter ，这样就可以知道数据何时被读取和修改。
+Vue2的响应式原理是通过Object.defineProperty实现的,被Object.defineProperty绑定过的对象，会变成「响应式」化。也就是改变这个对象的时候会触发get和set事件。进而触发一些视图更新
+CreateApp 作为 vue 的启动函数，返回一个应用实例
 
 vue2 使用一个Observer 类将data所有属性都转化为 getter/setter 的形式
+vue2的实现方式是在数据源对象上通过Object.defineProperty方法递归创建属性实现的，这些属性是属于被创建对象的;而vue3的实现方式，是通过给数据对象创建一个Proxy代理实现的，访问这个数据对象的任何属性都会通过这个代理
 
 
 
@@ -278,6 +450,14 @@ setup (props) {
 </teleport>
 ```
 ### 3. 片段
+Vue 3 正式支持了多根节点的组件
+```coffeescript
+<template>
+  <header>...</header>
+  <main v-bind="$attrs">...</main>
+  <footer>...</footer>
+</template>
+```
 ### 4. 触发组件选项 （emits 1.更好的记录已发出的事件，2.验证抛出的事件）
 
 ## 官方支持的库
