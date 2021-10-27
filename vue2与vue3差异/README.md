@@ -1,4 +1,4 @@
-# vue3 & vue2 差异
+# vue3
 
 ## Vite
 vite ，是一个基于浏览器原生 ES imports 的开发服务器(开发构建工具)，它做到了本地快速开发启动, 用 vite 文档上的介绍，它具有以下特点：
@@ -26,33 +26,140 @@ $ yarn dev
 
 
 ## 概览
-哪些变化  
+相比vue2.0有哪些变化  
 ![change.png](img/change.png)
 + 速度更快
 + 体积减少
 + 更易维护
 + 更接近原生
 + 更易使用
-1. 速度更快   
-+ 重写了虚拟Dom实现
-+ 编译模板的优化
-+ 更高效的组件初始化
-+ undate性能提高
-+ SSR速度提高
-2. 体积更小   
+
+1. 重写了虚拟Dom实现   
+  diff算法优化   
+```coffeescript
+<div>
+  <span/>
+  <span>{{ msg }}</span>
+</div>
+```
+被编译成:
+```coffeescript
+import { createVNode as _createVNode, toDisplayString as _toDisplayString, openBlock as _openBlock, createBlock as _createBlock } from "vue"
+
+export function render(_ctx, _cache) {
+  return (_openBlock(), _createBlock("div", null, [
+    _createVNode("span", null, "static"),
+    _createVNode("span", null, _toDisplayString(_ctx.msg), 1 /* TEXT */)
+  ]))
+}
+```
+
+Vue在运行时会生成number（大于0）值的PatchFlag，用作标记,仅带有PatchFlag标记的节点会被真正追踪，无论层级嵌套多深，它的动态节点都直接与Block根节点绑定，无需再去遍历静态节点   
+  ![img.png](img/diff.png)   
+  跳过静态节点，只处理动态节点,所以处理的数据量减少，性能得到很大的提升
+  把静态节点进行提升，提升到 render 函数外面，这样一来，这个静态节点永远只被创建一次，之后直接在 render 函数中使用就行了。   
+2. 事件监听缓存：cacheHandlers
+```
+<div>
+  <span @click="onClick">
+    {{msg}}
+  </span>
+</div>
+```
+优化前：
+```coffeescript
+import { toDisplayString as _toDisplayString, createVNode as _createVNode, openBlock as _openBlock, createBlock as _createBlock } from "vue"
+
+export function render(_ctx, _cache) {
+  return (_openBlock(), _createBlock("div", null, [
+    _createVNode("span", { onClick: _ctx.onClick }, _toDisplayString(_ctx.msg), 9 /* TEXT, PROPS */, ["onClick"])
+  ]))
+}
+```
+onClick会被视为PROPS动态绑定，后续替换点击事件时需要进行更新。   
+优化后：
+```coffeescript
+import { toDisplayString as _toDisplayString, createVNode as _createVNode, openBlock as _openBlock, createBlock as _createBlock } from "vue"
+
+export function render(_ctx, _cache) {
+  return (_openBlock(), _createBlock("div", null, [
+    _createVNode("span", {
+      onClick: _cache[1] || (_cache[1] = $event => (_ctx.onClick($event)))
+    }, _toDisplayString(_ctx.msg), 1 /* TEXT */)
+  ]))
+}
+```
+ 会自动生成一个内联函数，这个内联函数里面再去引用当前组件最新的onclick,然后把这个内联函数cache起来，第一次渲染的时候会创建内联函数并且缓存，后续的更新就直接从缓存里面读同一个函数，既然是同一个函数就没有再更新的必要，就变成了一个静态节点
+3. SSR速度提高   
+当有大量静态的内容时，这些内容会被当做纯字符串推进一个buffer里面，即使存在动态的绑定，会通过模板 插值嵌入进去，这样会比通过虚拟dom来渲染的快很多。vue3.0 当静态文件大到一定量的时候，会用_ceratStaticVNode方法在客户端去生成一个static node, 这些静态node,会被直接innerHtml,就不需要创建对象，然后根据对象渲染
+
+4. tree-shaking   
 ![threeShaking.png](img/threeShaking.png)   
 通过webpack的tree-shaking功能，可以将无用模块“剪辑”，仅打包需要的能够tree-shaking
-3. 更易维护   
-![maintain.png](img/maintain.png)
-  compositon Api   
+5. compositon Api   
+   ![maintain.png](img/maintain.png)
+与选项API最大的区别的是逻辑的关注点   
+选项API这种碎片化使得理解和维护复杂组件变得困难，在处理单个逻辑关注点时，我们必须不断地上下翻找相关代码的选项块。
+组合式API将同一个逻辑关注点相关代码收集在一起
+```
+import { useRouter } from 'vue-router'
+import { reactive, onMounted, toRefs } from 'vue'
+
+setup (props) {
+  const state = reactive({
+    userInfo: {}
+  })
+
+  const getUserInfo = async () => {
+    state.userInfo = await GET_USER_INFO(props.id)
+  }
+
+  onMounted(getUserInfo) // 在 `mounted` 时调用 `getUserInfo`
+
+  return {
+    ...toRefs(state),
+    goBack,
+    getUserInfo
+  }
+}
+```
   可与现有的Options API一起使用   
   灵活的逻辑组合与复用   
   vue3模块可以和其他框架搭配使用   
-  更好的Typescript支持   
-   vue3是基于typescipt编写的，可以享受到自动的类型定义提示   
-4. 更接近原生   
+6. Fragment   
+![fragment.png](img/fragment.png)
+```coffeescript
+<template>
+  <header>...</header>
+  <main v-bind="$attrs">...</main>
+  <footer>...</footer>
+</template>
+```
+Vue 3 正式支持了多根节点的组件   
+不再限于模板中的单个根节点,可纯文字，多节点，v-for等   
+render 函数也可以返回数组
+7. Teleport
+![teleport.png](img/teleport.png)
+允许我们控制在 DOM 中哪个父节点下渲染了 HTML
+```
+<teleport to="body">
+  <div v-if="modalOpen" class="modal">
+    <div>
+      I'm a teleported modal! 
+      (My parent is "body")
+      <button @click="modalOpen = false">
+        Close
+      </button>
+    </div>
+  </div>
+</teleport>
+```
+8. 更好的Typescript支持   
+   vue3是基于typescipt编写的，可以享受到自动的类型定义提示
+9. 自定义渲染 API   
    ![CloseNative.png](img/CloseNative.png)   
-   可以自定义渲染 API    
+   意味着以后可以通过 vue， Dom 编程的方式来进行 webgl 编程   
+   vue官方实现的 createApp 会给我们的 template 映射生成 html 代码，但是要是你不想渲染生成到 html ，而是要渲染生成到 canvas 之类的不是html的代码的时候，那就需要用到 Custom Renderer API 来定义自己的 render 渲染生成函数了。
 5. 更易使用   
    ![img.png](img/obervable.png)
    响应式 Api 暴露出来
@@ -403,61 +510,6 @@ vue2 使用一个Observer 类将data所有属性都转化为 getter/setter 的�
 vue2的实现方式是在数据源对象上通过Object.defineProperty方法递归创建属性实现的，这些属性是属于被创建对象的;而vue3的实现方式，是通过给数据对象创建一个Proxy代理实现的，访问这个数据对象的任何属性都会通过这个代理
 
 
-
-
-## vue3新特性
-### 1. 组合式 API
-与选项API最大的区别的是逻辑的关注点
-选项API
-这种碎片化使得理解和维护复杂组件变得困难，在处理单个逻辑关注点时，我们必须不断地上下翻找相关代码的选项块。
-组合式API将同一个逻辑关注点相关代码收集在一起
-```
-import { useRouter } from 'vue-router'
-import { reactive, onMounted, toRefs } from 'vue'
-
-setup (props) {
-  const state = reactive({
-    userInfo: {}
-  })
-
-  const getUserInfo = async () => {
-    state.userInfo = await GET_USER_INFO(props.id)
-  }
-
-  onMounted(getUserInfo) // 在 `mounted` 时调用 `getUserInfo`
-
-  return {
-    ...toRefs(state),
-    goBack,
-    getUserInfo
-  }
-}
-```
-
-### 2. Teleport
-允许我们控制在 DOM 中哪个父节点下渲染了 HTML
-```
-<teleport to="body">
-  <div v-if="modalOpen" class="modal">
-    <div>
-      I'm a teleported modal! 
-      (My parent is "body")
-      <button @click="modalOpen = false">
-        Close
-      </button>
-    </div>
-  </div>
-</teleport>
-```
-### 3. 片段
-Vue 3 正式支持了多根节点的组件
-```coffeescript
-<template>
-  <header>...</header>
-  <main v-bind="$attrs">...</main>
-  <footer>...</footer>
-</template>
-```
 ### 4. 触发组件选项 （emits 1.更好的记录已发出的事件，2.验证抛出的事件）
 
 ## 官方支持的库
