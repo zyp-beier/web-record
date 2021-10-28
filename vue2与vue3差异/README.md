@@ -102,16 +102,24 @@ export function render(_ctx, _cache) {
 在Vue2中，全局 API 如 Vue.nextTick() 是不支持 tree-shake 的，不管它们实际是否被使用，都会被包含在最终的打包产物中。   
 而Vue3源码引入tree shaking特性，将全局 API 进行分块。如果你不使用其某些功能，它们将不会包含在你的基础包中
 5. compositon Api   
-![maintain.png](img/maintain.png)
-灵活的逻辑组合与复用   
-可与现有的Options API一起使用  
-与选项API最大的区别的是逻辑的关注点   
-选项API这种碎片化使得理解和维护复杂组件变得困难，在处理单个逻辑关注点时，我们必须不断地上下翻找相关代码的选项块。   
-compositon API将同一个逻辑关注点相关代码收集在一起
+![maintain.png](img/maintain.png)   
+没有Composition API之前vue相关业务的代码需要配置到option的特定的区域，中小型项目是没有问题的，但是在大型项目中会导致后期的维护性比较复杂，同时代码可复用性不高   
+compositon api提供了以下几个函数：
++ setup （入口函数，接收两个参数（props，context））
++ ref
++ reactive
++ watchEffect
++ watch
++ computed
++ toRefs
+生命周期的hooks
+
 ```
 import { useRouter } from 'vue-router'
 import { reactive, onMounted, toRefs } from 'vue'
 
+// setup在beforeCreate 钩子之前被调用
+// props 是响应式的，当传入新的 prop 时，它将被更新(因为props是响应式的，所以不能使用 ES6 解构，因为它会消除 prop 的响应性。)
 setup (props) {
   const state = reactive({
     userInfo: {}
@@ -130,6 +138,11 @@ setup (props) {
   }
 }
 ```
+灵活的逻辑组合与复用   
+可与现有的Options API一起使用  
+与选项API最大的区别的是逻辑的关注点   
+选项API这种碎片化使得理解和维护复杂组件变得困难，在处理单个逻辑关注点时，我们必须不断地上下翻找相关代码的选项块。   
+compositon API将同一个逻辑关注点相关代码收集在一起
 6. Fragment（碎片）   
 ![fragment.png](img/fragment.png)
 ```coffeescript
@@ -164,6 +177,13 @@ render 函数也可以返回数组
    ![CloseNative.png](img/CloseNative.png)
    vue官方实现的 createApp 会给我们的 template 映射生成 html 代码，但是要是你不想渲染生成到 html ，而是要渲染生成到 canvas 之类的不是html的代码的时候，那就需要用到 Custom Renderer API 来定义自己的 render 渲染生成函数了。
    意味着以后可以通过 vue， Dom 编程的方式来进行canvas、webgl 编程
+10. 响应原理的变化   
+Vue2的响应式原理是通过Object.defineProperty实现的,被Object.defineProperty绑定过的对象，会变成「响应式」化。也就是改变这个对象的时候会触发get和set事件。进而触发一些视图更新
+CreateApp 作为 vue 的启动函数，返回一个应用实例
+
+vue2 使用一个Observer 类将data所有属性都转化为 getter/setter 的形式
+vue2的实现方式是在数据源对象上通过Object.defineProperty方法递归创建属性实现的，这些属性是属于被创建对象的;而vue3的实现方式，是通过给数据对象创建一个Proxy代理实现的，访问这个数据对象的任何属性都会通过这个代理
+
 
 ## 一, 全局api
 ### 1. 全局 Vue API 已更改为使用应用程序实例 
@@ -355,6 +375,7 @@ const asyncPageWithOptions  = defineAsyncComponent({
 如果emit的是原生的事件（如，click）,就会存在两次触发。   
 一次来自于$emit的触发；   
 一次来自于根元素原生事件监听器的触发；   
+（emits 1.更好的记录已发出的事件，2.验证抛出的事件）
 ```coffeescript
  export default {
     props: ['text'],
@@ -554,22 +575,15 @@ app.config.globalProperties.$filters = {
 + $children（如果需要访问子组件实例，建议使用 $refs）
 + propsData 选项之前用于在创建 Vue 实例的过程中传入 prop，现在它被移除了。如果想为 Vue 3 应用的根组件传入 prop，使用 createApp 的第二个参数。
 + 全局函数 set 和 delete 以及实例方法 $set 和 $delete。基于代理的变化检测不再需要它们了。
-## 响应原理的变化
-Vue2的响应式原理是通过Object.defineProperty实现的,被Object.defineProperty绑定过的对象，会变成「响应式」化。也就是改变这个对象的时候会触发get和set事件。进而触发一些视图更新
-CreateApp 作为 vue 的启动函数，返回一个应用实例
 
-vue2 使用一个Observer 类将data所有属性都转化为 getter/setter 的形式
-vue2的实现方式是在数据源对象上通过Object.defineProperty方法递归创建属性实现的，这些属性是属于被创建对象的;而vue3的实现方式，是通过给数据对象创建一个Proxy代理实现的，访问这个数据对象的任何属性都会通过这个代理
+## 用于迁移的构建版本
+@vue/compat (即“迁移构建版本”) 是一个 Vue 3 的构建版本，提供了可配置的兼容 Vue 2 的行为。   
 
+该构建版本默认运行在 Vue 2 的模式下——大部分公有 API 的行为和 Vue 2 一致，仅有一小部分例外。使用在 Vue 3 中发生改变或被废弃的特性时会抛出运行时警告。一个特性的兼容性也可以基于单个组件进行开启或禁用。
 
-### 4. 触发组件选项 （emits 1.更好的记录已发出的事件，2.验证抛出的事件）
+已知的限制:
++ 基于vue2内部API或文档中未记载行为的依赖。最常见的情况就是使用 VNodes 上的私有 property。如果你的项目依赖诸如 Vuetify、Quasar 或 Element UI 等组件库，那么最好等待一下它们的 Vue 3 兼容版本。
 
-## 官方支持的库
-Vue Router   
-Vue Router 4.0 提供了 Vue 3 支持   
-Vue CLI   
-v4.5.0   
-Vuex   
-Vuex 4.0 提供了 Vue 3 支持，其 API 与 3.x 基本相同
++ 对IE11的支持：Vue 3 已经官方放弃对 IE11 的支持。如果仍然需要支持 IE11 或更低版本，那你仍需继续使用 Vue 2。
 
-![vue2迁移vue3](./img/img.jpeg)
++ 服务端渲染：该迁移构建版本可以被用于服务端渲染，但是迁移一个自定义的服务端渲染设置有更多工作要做。大致的思路是将 vue-server-renderer 替换为 @vue/server-renderer。Vue 3 不再提供一个包渲染器，且我们推荐使用 Vite 以支持 Vue 3 服务端渲染。如果你正在使用 Nuxt.js，那最好等待一下 Nuxt 3。
