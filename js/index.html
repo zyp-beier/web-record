@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<style>
+  .pink {
+    background-color: pink;
+    width: 50px;
+    height: 50px;
+    display: none;
+  }
+  .red {
+    background-color: red;
+    width: 50px;
+    height: 50px;
+   
+  }
+  .father {
+    width: 150px;
+    height: 100px;
+    border: 1px solid pink;
+    /* position: relative; */
+  }
+  .son {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #ccc;
+    position: relative;
+    top: 0;
+    left: 50px;
+  }
+  .fa {
+    border: 1px solid #ccc;
+    width: 80%;
+    height: 500px;
+  }
+  .center {
+    border: 1px solid #666;
+    margin: 0 auto;
+    width: 50%;
+  }
+</style>
+
+<body>
+  <div style="height: 50px;">123</div>
+  <div style="height: 50px;">567</div>
+  <div class="red" onclick="red(event)"></div>
+  <div class="pink"></div>
+  
+
+  <button onclick="removeCache()">清缓存</button>
+
+ <div id="myDiv">
+   <input type="button" value='click me' id = 'button'>
+ </div>
+</body>
+<script>
+let arr = [1, 2, 3, 4, 5]
+// let arr1 = ['a', 'b', 'c', 'd']
+
+let arr2 = arr.pop()
+console.log(arr2);   // 5
+console.log(arr);   // [1, 2, 3, 4]
+</script>
+</html>
