@@ -144,7 +144,7 @@ ViewModel:  一是将【模型】转化成【视图】，即将后端传递的�
 钩子函数种类有:全局守卫、路由守卫、组件守卫
 
 1. 导航被触发。
-2. 在失活的组件里调用beforeRouteLeave守卫
+2. 在失活的 组件里调用beforeRouteLeave守卫
 3. 调用全局的beforeEach守卫
 4. 在重用的组件里调用beforeRouteUpdate守卫
 5. 在路由配置里调用beforeRouteEnter
