@@ -15,7 +15,6 @@
 instanceof可以正确的判断对象的类型，其内部运行机制是判断在原型链中能否找到该类型的原型
 instanceof只能判断正确引用数据类型，不能判断基本数据类型。instanceof运算符可以用来测试一个对象在其原型链中是否存在一个构造函数的prototype属性。
 3. constructor
-
 ```
 console.log((2).constructor)
 ```
@@ -65,7 +64,9 @@ NaN是一个特殊值，它和自身不相等是唯一一个非自反（NaN===Na
 箭头函数没有原型所以本身没有this，但可以捕获所在上下文的this使用。
 
 ### 事件循环
-js是单线程的，为了防止一个函数执行时间过长阻塞后面的代码，所以会先将同步的代码压入执行栈中，依稀执行，将异步代码推进异步队列，异步队列又分为宏任务队列和微任务队列，因为宏任务队列执行的时间较长，所以微任务队列要优先于宏任务队列。微任务队列的代表就是promise.then, MutationObserver,宏任务的话就是setImmediate setTimeout setInterval
+js是单线程的，为了防止一个函数执行时间过长阻塞后面的代码，所以会先将同步的代码压入执行栈中，依次执行，将异步代码推进异步队列，异步队列又分为宏任务队列和微任务队列，因为宏任务队列执行的时间较长，所以微任务队列要优先于宏任务队列。微任务队列的代表就是promise.then, MutationObserver,宏任务的话就是setImmediate setTimeout setInterval
+执行栈的执行方式是先进后出
+任务队列的执行方式是先进先出
 
 ### 事件冒泡、捕获
 event.stopPropagation() 或者 ie下的方法 event.cancelBubble = true; //阻止事件冒泡
@@ -141,7 +142,7 @@ function unique(arr) {
   return res
 }
 ```
-1. 利用es6 set去重
+5. 利用es6 set去重
 ```
 function unique (arr) {
   return Array.from(new Set(arr))
@@ -169,5 +170,6 @@ let result = Func.call(obj)
 4. 返回新对象（判断Func的返回值类型： 如果无返回值或者返回一个非对象的值，则将obj作为新对象返回；否则会将result作为新对象返回）
 
 
+### 
+跨域
 
-数组总结 跨域
