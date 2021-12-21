@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .box {
+      width: 200px;
+      height: 200px;
+      background-color: pink;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      animation: slide 8s linear infinite;
+    }
+    @keyframes slide {
+      20% {
+        left: 150px;
+      }
+      40% {
+        left: 200px;
+      }
+      60% {
+        left: 250px;
+      }
+      80% {
+        left: 300px;
+      }
+      100% {  
+        left: 350px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <div class="box"></div>
+  </div>
+  <script>
+  function SuperType(name, age) {
+    this.name = name
+    this.colors = ['red', 'black', 'pink']
+  }
+  SuperType.prototype.sayName = function() {
+    console.log(this.name)
+  }
+
+  function SubType(name, age) {
+    this.age = age
+    SuperType.call(this, name)
+  }
+
+  SubType.prototype = new SuperType()
+  SubType.prototype.sayAge = function() {
+    console.log(this.age)
+  }
+
+
+  const subType = new SubType('a', 24)
+subType.colors.push('green')
+subType.sayName() // a
+subType.sayAge()  // 24
+
+const subType2 = new SubType('a', 24)
+console.log(subType2.colors)
+subType2.sayName()
+subType2.sayAge()
+
+
+  </script>
+</body>
+</html>

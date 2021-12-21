@@ -7,7 +7,7 @@
 
 原始数据类型直接存储在栈（stack）中的简单数据段，占据空间小、大小固定、属于被频繁使用的数据
 
-引用数据类型存储在堆（heap）中的对象,占据空间大、大小不固定。
+引用数据类型存储在堆（heap）中的对象,占据空间大、大小不固定，引用地址存储在栈中，本身内容存储在堆中。
 ### 数据类型检测的方式？
 1. typeof
 其中 数组、对象、null、都会被判断为object其他判断都正确
@@ -70,85 +70,6 @@ js是单线程的，为了防止一个函数执行时间过长阻塞后面的代
 
 ### 事件冒泡、捕获
 event.stopPropagation() 或者 ie下的方法 event.cancelBubble = true; //阻止事件冒泡
-
-### 防抖节流
-防抖的原理是事件被触发n秒后在执行回调，如果在这n秒内又被触发，则重新计时
-应用场景： 
-resize/scroll 触发统计事件
-文本输入验证，不用用户输一个文字请求一次，随着用户的输入验证一次就可以
-
-节流的核心是让一个函数不要执行的太频繁，减少一些过快的调用来节流，也就是在一段固定的时间内只触发一次回调函数，即便在这段时间内某个事件多次被触发也只触发回调一次。
-应用场景：
-DOM 元素的拖拽功能实现
-计算鼠标移动的距离
-搜索联想
-
-### 数组去重
-1. 双循环去重
-```
-const arr = [1, 1, 2, 3, 3, 4, 5, 5, 6, 7, 7, 8, 9, 9, 10]
-function unique() {
-  
-  let arr1 = [arr[0]]
-    for(let i = 0; i < arr.length; i++ ) {
-      let flag = true
-      for(let j = 0; j < arr1.length; j++) {
-        if (arr[i] === arr1[j]) {
-          flag = false;
-          break
-        }
-      }
-      if (flag) {
-        arr1.push(arr[i])
-      }
-    }
-    return arr1
-}
-```
-2. index of 去重1
-```
-function unique() {
-  
-  let arr1 = []
-  for (let i = 0; i < arr.length; i++) {
-    if (arr1.indexOf(arr[i]) === -1 ) {
-      arr1.push(arr[i])
-    }
-  }
-    return arr1
-}
-```
-3. indexof 去重2
-```
-function unique() {
-  let arr1 = []
-  return arr.filter((item, index) => {
-      return arr.indexOf(item) === index
-  })
-}
-```
-4. 相邻元素去重
-这种方法首先调用了数组的排序方法sort()，然后根据排序后的结果进行遍历及相邻元素比对，如果相等则跳过改元素，直到遍历结束
-
-```
-function unique(arr) {
-  arr = arr.sort()
-  let res = []
-  for (let i = 0; i < arr.length; i++) {
-      if (arr[i] !== arr[i-1]) {
-          res.push(arr[i])
-      }
-  }
-  return res
-}
-```
-5. 利用es6 set去重
-```
-function unique (arr) {
-  return Array.from(new Set(arr))
-}
-```
-
 ### 小程序开发用户授权流程
 1. 使用wx.authorize 向用户发起授权请求
 
@@ -170,6 +91,9 @@ let result = Func.call(obj)
 4. 返回新对象（判断Func的返回值类型： 如果无返回值或者返回一个非对象的值，则将obj作为新对象返回；否则会将result作为新对象返回）
 
 
-### 
-跨域
+暂时性死区（Temporal Dead Zone ）
+用MDN上的定义
 
+> let bindings are created at the top of the (block) scope containing the declaration, commonly referred to as “hoisting”. Unlike variables declared with var, which will start with the value undefined, let variables are not initialized until their definition is evaluated. Accessing the variable before the initialization results in a ReferenceError. The variable is in a “temporal dead zone” from the start of the block until the initialization is processed.
+
+大概意思便是let同样存在变量提示（hoisting），只是形式与var不同，var定义的变量将会被赋予undefined的初始值，而let在被显式赋值之前不会被赋予初始值，并且在赋值之前读写变量都会导致 ReferenceError 的报错。从代码块(block)起始到变量求值(包括赋值)以前的这块区域，称为该变量的暂时性死区。

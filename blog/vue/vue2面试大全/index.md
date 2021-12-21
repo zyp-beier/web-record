@@ -1,11 +1,12 @@
-### vue的响应式原理
-整体思路是数据劫持+观察者模式    
+### 响应式原理
+整体思路是数据劫持+观察者模式（发布者-订阅者模式）  
 vue会遍历data选项中的所有属性，并使用object.defineProperty劫持属性的getter/setter,数组则是通过重写数组方法来实现。当页面使用对应属性时，每个属性都拥有自己的 dep 属性，存放他所依赖的 watcher（依赖收集），当属性变化后会通知自己对应的 watcher 去更新(派发更新)。
 
 ### -------nextTick原理
 主要思路就是采用微任务优先的方式调用异步方法去执行 nextTick 包装的方法    
 
 下次DOM更新循环结束之后执行延迟回调，再修改数据之后使用$nextTick,则可以在回调中使用更新后的dom，
+
 Vue在更新DOM时是异步执行的。只要侦听到数据变化，Vue将开启1个队列，并缓冲在同一事件循环中发生的所有数据变更。如果同一个watcher被多次触发，只会被推入到队列中-次。这种在缓冲时去除重复数据对于避免不必要的计算和DOM操作是非常重要的。nextTick方法会在队列中加入一个回调函数，确保该函数在前面的dom操作完成后才调用；
 nextTick主要使用了宏任务和微任务。 根据执行环境分别尝试采用Promise、MutationObserver、setImmediate，如果以上都不行则采用setTimeout定义了一个异步方法，多次调用nextTick会将方法存入队列中，通过这个异步方法清空当前队列
 
@@ -36,7 +37,6 @@ mounted: 实例挂载到DOM上，此时可以操作dom但不会保证所有的�
 + update阶段： data数据变化时，触发组件的重新渲染
 beforeUpdate: 数据发生改变后，DOM 被更新之前
 updated：数据更改且DOM重新渲染之后
-
 + destroy阶段： 实例被销毁
 beforeDestroy：实例销毁前，此时可以手动销毁一些方法
 destroyed:销毁后

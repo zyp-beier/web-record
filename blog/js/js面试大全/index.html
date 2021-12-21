@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<style>  
+#source {
+  width: 100px;
+  height: 1500px;
+  border: 1px solid #ccc;
+}
+</style>
+
+<body>
+  <div style="height: 50px;">123</div>
+  <div style="height: 50px;">567</div>
+  <div class="red" onclick="red(event)"></div>
+  <div class="box1" id='source' draggable="true"></div>
+  <br>
+  <div class="box2" id="target"></div>
+
+  <button onclick="removeCache()">清缓存</button>
+
+ <div id="myDiv">
+   <input type="button" value='click me' id = 'button' onclick="handleThrottling()">
+ </div>
+</body>
+<script>
+  function debounce(func, wait) {
+    if (typeof func !== 'function') {
+      throw new Error('need a function')
+    }
+
+    wait = +wait || 0
+    let timer = null
+    return function() {
+      if (timer) {
+        clearTimeout(timer)
+      }
+      timer = setTimeout(func, wait)
+    }
+  }
+  // const handleThrottling = debounce(() => {
+  //     console.log(123)
+  // }, 2000)
+  window.addEventListener('scroll', debounce(() => {
+    console.log('滚动')
+  }, 100))
+</script>
+</html>
+
+
