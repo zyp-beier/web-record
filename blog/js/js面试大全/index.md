@@ -79,16 +79,11 @@ function Func(){
 }
 let func= new Func();
 ```
-1. 创建一个空对象
-let obj = new Object()
-
-2. 链接到原型
-把obj的proto指向构造函数的原型对象prototype，此时便建立了obj对象的原型链：
-obj>Func.prototype>Object.prototype>null
-obj._proto_ = Func.prototype
-3. 绑定this值（让Func中的this指向obj，并执行Fun的函数体）
-let result = Func.call(obj)
-4. 返回新对象（判断Func的返回值类型： 如果无返回值或者返回一个非对象的值，则将obj作为新对象返回；否则会将result作为新对象返回）
+1. 创建一个新对象
+2. 新对象内部的[[Prototype]]指针被赋值为构造函数的prototype属性
+3. 将构造函数的作用域赋给新对象（因此 this 就指向了这个新对象）
+4. 执行构造函数内部的代码（给新对象添加属性）
+5. 如果构造函数返回非空对象，则返回该对象；否则，返回刚创建的新对象。
 
 
 暂时性死区（Temporal Dead Zone ）
@@ -97,3 +92,41 @@ let result = Func.call(obj)
 > let bindings are created at the top of the (block) scope containing the declaration, commonly referred to as “hoisting”. Unlike variables declared with var, which will start with the value undefined, let variables are not initialized until their definition is evaluated. Accessing the variable before the initialization results in a ReferenceError. The variable is in a “temporal dead zone” from the start of the block until the initialization is processed.
 
 大概意思便是let同样存在变量提示（hoisting），只是形式与var不同，var定义的变量将会被赋予undefined的初始值，而let在被显式赋值之前不会被赋予初始值，并且在赋值之前读写变量都会导致 ReferenceError 的报错。从代码块(block)起始到变量求值(包括赋值)以前的这块区域，称为该变量的暂时性死区。
+
+
+
+let personName, personAge;
+
+let person = {
+  name: 'aa',
+  age: 12
+};
+
+({name: personName, age: personAge} = person)
+
+console.log(personName, personAge)
+
+
+
+
+
+
+
+let person = {
+  name: '13',
+  age: 24,
+  job: {
+    title: 'jobjob'
+  }
+};
+
+let person1 = {};   // 必须加分号
+
+({name: person1.name1, age: person1.age1, job: person1.job1} = person)
+
+console.log(person)
+console.log(person1)
+
+person.job.title = 'aaaaaa'
+console.log(person)
+console.log(person1)

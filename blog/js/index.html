@@ -14,7 +14,7 @@
       top: 0;
       bottom: 0;
       left: 0;
-      animation: slide 8s linear infinite;
+      /* animation: slide 8s linear infinite; */
     }
     @keyframes slide {
       20% {
@@ -40,36 +40,14 @@
     <div class="box"></div>
   </div>
   <script>
-  function SuperType(name, age) {
+// 抽象基类
+class Person {
+  constructor(name) {
     this.name = name
-    this.colors = ['red', 'black', 'pink']
   }
-  SuperType.prototype.sayName = function() {
-    console.log(this.name)
-  }
-
-  function SubType(name, age) {
-    this.age = age
-    SuperType.call(this, name)
-  }
-
-  SubType.prototype = new SuperType()
-  SubType.prototype.sayAge = function() {
-    console.log(this.age)
-  }
-
-
-  const subType = new SubType('a', 24)
-subType.colors.push('green')
-subType.sayName() // a
-subType.sayAge()  // 24
-
-const subType2 = new SubType('a', 24)
-console.log(subType2.colors)
-subType2.sayName()
-subType2.sayAge()
-
-
+}
+const person = new Person('liSa')  
+console.log(person)  // Person {name: 'liSa'}
   </script>
 </body>
 </html>

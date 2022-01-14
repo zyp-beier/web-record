@@ -186,3 +186,8 @@ vuex 和 vue-router 的插件注册方法 install 判断如果系统存在实例
 ### vue-loader是什么？使用它的用途有哪些？
 vue文件的一个加载器，将template/js/style转换成js模块。
 用途：js可以写es6、style样式可以scss或less、template可以加jade等
+
+
+
+### vue和react的区别
+主要是涉及思路不同
