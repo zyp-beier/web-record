@@ -78,12 +78,13 @@ method：
 + 计算属性是基于他们的依赖进行缓存的，只有相关依赖发生变化的才会重新求值。methods调用总会执行函数
 
 ### 组件传值都有哪些方法
-+ 父子传值 props>$emit
-+ $parent $children 获取当前组件的父组件和当前组件的子组件
+父子传值 
+1. props $emit
+2. $parent $children 获取当前组件的父组件和当前组件的子组件
 + $attrs $listeners A>B>C
 + provide inject
 + $refs获取组件实例
-+ event Bus兄弟组件数据传递
++ $emit $on兄弟组件数据传递
 + vux 状态管理
 
 ### keep-alive的实现

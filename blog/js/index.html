@@ -6,48 +6,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
   <style>
-    .box {
-      width: 200px;
-      height: 200px;
-      background-color: pink;
-      position: fixed;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      /* animation: slide 8s linear infinite; */
+    .box-wrap {
+      border: 1px solid #ccc;
     }
-    @keyframes slide {
-      20% {
-        left: 150px;
-      }
-      40% {
-        left: 200px;
-      }
-      60% {
-        left: 250px;
-      }
-      80% {
-        left: 300px;
-      }
-      100% {  
-        left: 350px;
-      }
+    .box1 {
+      float: left;
+      width: 100px;
+      border: 1px solid #ccc; 
+    }
+    .box2 {
+      margin: 0 100px;
+    }
+    .box3 {
+      float: right;
+      width: 100px;
+      border: 1px solid #ccc;
     }
   </style>
 </head>
 <body>
   <div>
-    <div class="box"></div>
+    <div class="box-wrap">
+      <div class="box1">1</div>
+      <div class="box2">2</div>
+      <div class="box3">3</div>
+    </div>
   </div>
   <script>
-// 抽象基类
-class Person {
-  constructor(name) {
-    this.name = name
-  }
-}
-const person = new Person('liSa')  
-console.log(person)  // Person {name: 'liSa'}
+    
   </script>
 </body>
 </html>
