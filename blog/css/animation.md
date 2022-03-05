@@ -1,7 +1,7 @@
 良好的用户体验和交互是一个产品提高用户粘性以及影响力的必要条件，同时也是我们前端技术人员比较专注的问题，那么css3动画就是将我们的静态页面变为更具灵动性和趣味性的一种方式，下面就让我们来了解一下它吧
 develop
-animation属性是 animation-name,animation-duration,animation-timing-function,animation-delay,animation-iteration-count，animation-direction，animation-fill-mode 和 animation-play-state 属性的一个简写属性形式。
-
+animation属性是 animation-name,animation-duration,animation-timing-function,animation-delay,animation-iteration-count，animation-direction，animation-fill-mode 和 animation-play-state 属性的一个简写属性形式。   
+develop分支添加
 
 animation-name: 指定绑定到选择器的关键帧的名称，每个名称代表一个由@keyframes定义的动画序列
 animation-duration： 指定一个动画周期的时长
