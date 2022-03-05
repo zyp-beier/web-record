@@ -3,7 +3,6 @@ feat
 develop   
 animation属性是 animation-name,animation-duration,animation-timing-function,animation-delay,animation-iteration-count，animation-direction，animation-fill-mode 和 animation-play-state 属性的一个简写属性形式。
 
-
 animation-name: 指定绑定到选择器的关键帧的名称，每个名称代表一个由@keyframes定义的动画序列
 animation-duration： 指定一个动画周期的时长
 animation-timing-function：定义CSS动画在每一动画周期中执行的节奏
